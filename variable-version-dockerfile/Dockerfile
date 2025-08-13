@@ -1,0 +1,8 @@
+
+FROM alpine:latest
+
+ARG APP_VERSION=1.0.0
+
+ENV APP_VERSION_ENV=$APP_VERSION
+
+CMD echo "Versão em execução: $APP_VERSION_ENV"
