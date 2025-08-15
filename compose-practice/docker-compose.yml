@@ -1,0 +1,24 @@
+
+services:
+  api:
+    build: .
+
+    ports:
+     - "8080:8080"
+    networks:
+      - api-network
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    networks:
+      - api-network
+
+volumes:
+   redis-data:
+
+networks:
+  api-network:
+
+
