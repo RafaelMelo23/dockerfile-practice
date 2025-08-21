@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    networks:
+      - app-network
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      - context: ./frontend
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+volumes:
+  redis-data:
+networks:
+  app-network:
