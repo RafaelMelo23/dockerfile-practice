@@ -1,0 +1,32 @@
+
+services:
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app_netw
+
+  api:
+    build: ./api
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/mydatabase
+    depends_on:
+      - mongo
+    networks:
+      - app_netw
+
+  client:
+    build: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - app_netw
+
+networks:
+  app_netw:
+
+volumes:
+  app_netw:

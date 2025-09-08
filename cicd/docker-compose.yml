@@ -1,0 +1,21 @@
+
+services:
+  app:
+    build:
+      context: ./app
+    networks:
+      - ci_net
+
+  tests:
+    build:
+      context: ./tests
+    depends_on:
+      - app
+    command: ["pytest"]
+    profiles:
+      - ci
+    networks:
+      - ci_net
+
+networks:
+  ci_net:
