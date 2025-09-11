@@ -1,18 +1,66 @@
 
 services:
   backend:
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
     build: ./backend
     networks:
       - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_NAME=ecommerce_db
+      - DB_USER=ecommerce_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password.txt
+    secrets:
+      - db_password
 
   nginx:
     build: ./nginx-image
     ports:
       - "8080:80"
+      - "8443:443"
     networks:
       - app-network
     depends_on:
       - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+  db:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 2G
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ecommerce_db
+      - POSTGRES_USER=ecommerce_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password.txt
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    secrets:
+      - db_password
+    healthcheck:
+      test: ["CMD", "pg_isready" "-U", "ecommerce_user", "-d", "ecommerce_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
 
 networks:
   app-network:
+volumes:
+  postgres_data:
+secrets:
+  db_password:
+    file: ./secrets/postgres_password.txt
